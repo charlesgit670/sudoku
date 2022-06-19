@@ -1,0 +1,34 @@
+{
+  "version": "4.5.9",
+  "flags": {},
+  "shapes": [
+    {
+      "label": "sudoku",
+      "points": [
+        [
+          38.871287128712865,
+          94.04950495049505
+        ],
+        [
+          456.1980198019802,
+          95.53465346534654
+        ],
+        [
+          459.1683168316831,
+          447.5148514851485
+        ],
+        [
+          37.88118811881188,
+          449.990099009901
+        ]
+      ],
+      "group_id": null,
+      "shape_type": "polygon",
+      "flags": {}
+    }
+  ],
+  "imagePath": "..\\detection_train\\image107.jpg",
+  "imageData": null,
+  "imageHeight": 480,
+  "imageWidth": 640
+}
