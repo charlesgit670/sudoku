@@ -7,8 +7,6 @@ import os
 from tensorflow.keras import models
 import numpy as np
 
-
-
 def modelSolver():
       '''
       Load model and weight
@@ -195,34 +193,8 @@ def testAccuracy():
       
       print('Accuracy over ',totalNumberOfGrid,' example : ',count/totalNumberOfGrid)
       
-def testAccuracy2():
-      '''
-      Estimate accuracy on a data set with different level of sudoku
       
-      '''
-      grids = []
-      model_sudokuSolver = modelSolver()
-      with open('../sudokuGrid/sudoku-3m.csv') as sudoku_data:
-            rows = csv.reader(sudoku_data, delimiter=',')
-            for count, row in enumerate(rows):
-                  if count == 0:
-                        continue
-                  if count == 100:
-                        break
-                  grids.append(np.array(list(map(int, list(row[1].replace('.','0'))))).reshape(9,9))
-      grids = np.array(grids).reshape(-1,9,9,1)
-      
-      totalNumberOfGrid = grids.shape[0]
-      count = 0
-      for grid in grids:   
-            output = sudoku_solver(grid, model_sudokuSolver)
-            if checkSudokuValid(output, True): 
-                  count += 1
-      
-      print('Accuracy over ',totalNumberOfGrid,' example : ',count/totalNumberOfGrid)
-      
-      
-# testAccuracy2()
+# testAccuracy()
 
 
 

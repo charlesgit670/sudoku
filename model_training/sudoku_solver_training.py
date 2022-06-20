@@ -11,6 +11,8 @@ from tensorflow.keras import layers,models,Model
 from tensorflow.keras.layers import Input
 from sklearn.model_selection import train_test_split
 
+from model_prediction.sudoku_solver_prediction import sudoku_solver, checkSudokuValid
+
 x_train = []
 y_train = []
 
@@ -128,6 +130,16 @@ modelSolver.summary()   #display architecture of the model
 modelSolver.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy']) 
 history = modelSolver.fit(x_train, y_train, validation_data=(x_val,y_val), batch_size=64, epochs=3)
 
+#calculate accuracy
+# testGrid = x_val[1:100]    
+# totalNumberOfGrid = testGrid.shape[0]
+# count = 0
+# for grid in testGrid:   
+#       output = sudoku_solver(grid)
+#       if checkSudokuValid(output, True): 
+#             count += 1      
+# print('Accuracy over ',totalNumberOfGrid,' example : ',count/totalNumberOfGrid)
+
 #save model and weight
 os.makedirs("output", exist_ok=True)
 modelSolver.save("output/model_sudokuSolver")
@@ -140,3 +152,5 @@ plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'val'], loc='upper left')
 plt.show()
+
+    
