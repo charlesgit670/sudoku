@@ -28,7 +28,7 @@ def get_sudoku_dicts(directory):
     '''
     classes = ['sudoku']
     dataset_dicts = []
-    for filename in [file for file in os.listdir(directory) if file.endswith('.json')]:
+    for idx, filename in enumerate([file for file in os.listdir(directory) if file.endswith('.json')]):
         json_file = os.path.join(directory, filename)
         with open(json_file) as f:
             img_anns = json.load(f)
@@ -38,6 +38,7 @@ def get_sudoku_dicts(directory):
         filename = os.path.join(directory, img_anns["imagePath"])
         
         record["file_name"] = filename
+        record["image_id"] = idx
         record["height"] = img_anns["imageHeight"]
         record["width"] = img_anns["imageWidth"]
       
@@ -103,5 +104,9 @@ cfg.MODEL.WEIGHTS = "output/model_final.pth"
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7   
 predictor = DefaultPredictor(cfg)
 
-
+from detectron2.evaluation import COCOEvaluator, inference_on_dataset
+from detectron2.data import build_detection_test_loader
+evaluator = COCOEvaluator("sudoku_test", output_dir="./output")
+test_loader = build_detection_test_loader(cfg, "sudoku_test")
+print(inference_on_dataset(predictor.model, test_loader, evaluator))
 
