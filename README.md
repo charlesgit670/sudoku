@@ -4,10 +4,10 @@ The goal is to solve sudoku from his image only by using machine learning/deep l
 
 The project is split into 3 differents step:
 - Detection of the sudoku grid -> extract and warp grid image -> split each cell of the grid
-- Read numbers from images
+- Read digits from images
 - Solve sudoku
-## Step 1: Extract sudoku grid and numbers
-To properly separate each numbers from the sudoku grid. I need to determine as precisely as possible the sudoku's outline. To achieve that, semantic segmentation seem to be the best choice here (of course there is non ML technique that can achieve it too). After some research, I decide to use the library detectron2 from Facebook AI Research. This library is easy to use and have multiple model for object detection, semantic or keypoint detection. In addition, each model has an already pretrained weight that can be loaded before running our data.
+## Step 1: Extract sudoku grid and digits
+To properly separate each digits from the sudoku grid. We need to determine as precisely as possible the sudoku's outline. To achieve that, semantic segmentation seem to be the best choice here (of course there is non ML technique that can achieve it too). After some research, I decided to use the library detectron2 from Facebook AI Research. This library is easy to use and have multiple model for object detection, semantic or keypoint detection. In addition, each model has an already pretrained weight that can be loaded before running our data. I retreived from internet 200 images split into 160 train and 40 test that I labeled by hand with [labelme](https://datagen.tech/guides/image-annotation/labelme/).
 I used mask_rcnn_R_50_FPN_3x for segmentation because it's the lighter model with 3.0 Go used and it can run on my GPU [models documentation](https://github.com/facebookresearch/detectron2/blob/main/MODEL_ZOO.md).
 
 <img align="left" width="333" height="250" src="https://github.com/charlesgit670/sudoku/blob/main/result/sudoku.jpg">
@@ -16,7 +16,7 @@ I used mask_rcnn_R_50_FPN_3x for segmentation because it's the lighter model wit
 
 Left the input image and right the output after segmentation. It worked very well !
 <br/>
-The outline isn't perfect but all the numbers are fine inside and the grid is detected with a very hight confidence (100% here). To represent how well the model work, we usually use AP metric.
+The outline isn't perfect but all the digits are fine inside and the grid is detected with a very hight confidence (100% here). To represent how well the model work, we usually use AP metric.
 
 <img align="left" width="680" height="90" src="https://github.com/charlesgit670/sudoku/blob/main/result/APmetric.JPG?raw=true">
 <br clear="left"/>
@@ -33,5 +33,14 @@ Here we got a perfect score of 100 ! This problem is too easy for our model beca
 <br clear="left"/>
 Then we choose the segmentation with the largest area because we consider only one grid per image. We warp the image to the box size predicted and split each cell into unique image.
 
-## Step 2: Read numbers
+## Step 2: Read digits
+Now, to read digits that we extracted before, we need another CNN model. I started with LeNet5 architecture with the famous mnist dataset (handwritten digit) for pretrain our model before training it on 800 digits extracted from the sudoku images with our previous model. Unfortunately the results were not perfect because our digits are not well centered and the the border of the grid on some images disturb the prediction. To improve result, I found a model with better performance on [kaggle](https://www.kaggle.com/code/cdeotte/25-million-images-0-99757-mnist/notebook) that use data augmentation to make the model more robust. For the training part on our images, we increase the horizontal shift on data augmentation because there are more variance.
+
+<img align="left" width="333" height="250" src="https://github.com/charlesgit670/sudoku/blob/main/result/LossNumbersRecognition.png?raw=true">
+<img align="left" width="231" height="220" src="https://github.com/charlesgit670/sudoku/blob/main/result/sudokuUnsolved.JPG?raw=true">
+<br clear="left"/>
+
+The results are very good with an accuracy of 98% and no overfitting as shown in the figure on the left (there is no gap bewtween train and val loss). Nevertheless the model still struggle with blurry images. A future improvement can be made by adding blurry to the data augmentation.
+
 ## Step 3: Solve sudoku grid
+Finally, it's time to solve the sudoku. I try a few models following my intuition but the results were bad
