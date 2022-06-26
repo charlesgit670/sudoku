@@ -18,7 +18,7 @@ Left the input image and right the output after segmentation. It worked very wel
 <br/>
 The outline isn't perfect but all the digits are fine inside and the grid is detected with a very hight confidence (100% here). To represent how well the model work, we usually use AP metric.
 
-<img align="left" width="680" height="90" src="https://github.com/charlesgit670/sudoku/blob/main/result/APmetric.JPG?raw=true">
+<img align="left" width="680" height="90" src="https://github.com/charlesgit670/sudoku/blob/main/result/APmetric.JPG">
 <br clear="left"/>
 
 AP (average precision) is based on precision/recall metric. Precision means how accurate are our prediction and Recall represent the prediction that are missing.
@@ -34,13 +34,39 @@ Here we got a perfect score of 100 ! This problem is too easy for our model beca
 Then we choose the segmentation with the largest area because we consider only one grid per image. We warp the image to the box size predicted and split each cell into unique image.
 
 ## Step 2: Read digits
-Now, to read digits that we extracted before, we need another CNN model. I started with LeNet5 architecture with the famous mnist dataset (handwritten digit) for pretrain our model before training it on 800 digits extracted from the sudoku images with our previous model. Unfortunately the results were not perfect because our digits are not well centered and the the border of the grid on some images disturb the prediction. To improve result, I found a model with better performance on [kaggle](https://www.kaggle.com/code/cdeotte/25-million-images-0-99757-mnist/notebook) that use data augmentation to make the model more robust. For the training part on our images, we increase the horizontal shift on data augmentation because there are more variance.
+Now, to read digits that we extracted before, we need another CNN model. I started with LeNet5 architecture with the famous mnist dataset (handwritten digit) for pretrain our model before training it on 800 digits extracted from the sudoku images with our previous model. Unfortunately the results were not perfect because our digits are not well centered and the border of the grid on some images disturb the prediction. To improve result, I found a model with better performance on [kaggle](https://www.kaggle.com/code/cdeotte/25-million-images-0-99757-mnist/notebook) that use data augmentation to make the model more robust. For the training part on our images, we increased the horizontal shift on data augmentation because there are more variance due to a non perfect segmentation of the grid.
 
-<img align="left" width="333" height="250" src="https://github.com/charlesgit670/sudoku/blob/main/result/LossNumbersRecognition.png?raw=true">
-<img align="left" width="231" height="220" src="https://github.com/charlesgit670/sudoku/blob/main/result/sudokuUnsolved.JPG?raw=true">
+<img align="left" width="333" height="250" src="https://github.com/charlesgit670/sudoku/blob/main/result/LossNumbersRecognition.png">
+<img align="left" width="231" height="220" src="https://github.com/charlesgit670/sudoku/blob/main/result/sudokuUnsolved.JPG">
 <br clear="left"/>
 
 The results are very good with an accuracy of 98% and no overfitting as shown in the figure on the left (there is no gap bewtween train and val loss). Nevertheless the model still struggle with blurry images. A future improvement can be made by adding blurry to the data augmentation.
 
 ## Step 3: Solve sudoku grid
-Finally, it's time to solve the sudoku. I try a few models following my intuition but the results were bad
+Finally, it's time to solve the sudoku. I try a few models following my intuition with an output like Unet architecture, 9x9 (grid) x9 filter for each digits probabilities. The data used are retreive from [kaggle](https://www.kaggle.com/datasets/radcliffe/3-million-sudoku-puzzles-with-ratings) which contains 3 millions sudoku with their complete solutions and different levels of difficuty. Even if we predict digit one by one with the highter probability instead of solving it in one time, we fully solved it with an accuracy close to 0% (yes, it's pretty bad). After that, I found a simple model with better results on [github](https://github.com/shivaverma/Sudoku-Solver/blob/master/model.py).
+
+<img align="left" width="390" height="260" src="https://github.com/charlesgit670/sudoku/blob/main/result/LossSudokuSolver.png">
+<br clear="left"/>
+
+We check that we are not overfitting our model (no gap between train and val loss)
+
+<img align="left" width="351" height="15" src="https://github.com/charlesgit670/sudoku/blob/main/result/AccuracyOver99MultipleDifficultiesExample.JPG">
+<img align="left" width="345" height="14" src="https://github.com/charlesgit670/sudoku/blob/main/result/AccuracyOver99EasyExample.JPG">
+<br clear="left"/>
+
+On the left, the accuracy for a 99 samples from the 3 millions data with different level of difficulty and on the right the accuracy of another [data set](https://www.kaggle.com/datasets/bryanpark/sudoku) with easy level of difficulty only. The results are good on easy level only.
+
+<img align="left" width="150" height="140" src="https://github.com/charlesgit670/sudoku/blob/main/result/suodkuSolved.JPG">
+<br clear="left"/>
+
+After applying the model on our previous extracted digits, we succesfully solved our sudoku. But what happen when it failed to solve it ?
+
+<img align="left" width="150" height="140" src="https://github.com/charlesgit670/sudoku/blob/main/result/sudokuUnsolved2.JPG">
+<img align="left" width="150" height="140" src="https://github.com/charlesgit670/sudoku/blob/main/result/sudokuSolved2.JPG">
+<br clear="left"/>
+
+Here an example of failure. We delete each wrong value and replace them by 0. Even if we try to predict the latest numbers, the result is still the same.<br/>
+This is an astonishing result ! It's very easy to finish the sudoku but the model can't. We can conclude that the model didn't understand the logic of the sudoku and that it probably solved it using brute force with our huge dataset of 3 millions grid of sudoku.
+
+## Conclusion
+We saw that CNN can be very efficient in detecting pattern like digits and didn't need a lot of data if it is well pretrained. In addition, data augmentation can significantly increase the robustness of the model. But CNN seems unable to understand logic in data like the sudoku rules.
